@@ -40,7 +40,7 @@ exec_program(${LLVM_CONFIG}
 	ARGS --libs ${LLVM_LIBS}
 	OUTPUT_VARIABLE LLVM_LIBS_FLAGS)
 exec_program(${LLVM_CONFIG}
-	ARGS --ldflags 
+	ARGS --ldflags
 	OUTPUT_VARIABLE LLVM_LDFLAGS)
 string(REGEX REPLACE "([0-9]*).([0-9]*).*" "-DLLVM_MAJOR=\\1 -DLLVM_MINOR=\\2"  LLVM_VERSION "${LLVM_VER}")
 
@@ -63,14 +63,14 @@ option(BUILD_DOCUMENTATION "Use Doxygen to create the HTML based API documentati
 if(BUILD_DOCUMENTATION)
 	FIND_PACKAGE(Doxygen)
 	if (NOT DOXYGEN_FOUND)
-		message(FATAL_ERROR 
+		message(FATAL_ERROR
 			"Doxygen is needed to build the documentation. Please install it correctly")
 	endif()
 	#-- Configure the Template Doxyfile for our specific project
-	configure_file(Doxyfile.in 
+	configure_file(Doxyfile.in
 	               ${PROJECT_BINARY_DIR}/Doxyfile @ONLY IMMEDIATE)
 	#-- Add a custom target to run Doxygen when ever the project is built
-	add_custom_target (Docs ALL 
+	add_custom_target (Docs ALL
 	                   COMMAND ${DOXYGEN_EXECUTABLE} ${PROJECT_BINARY_DIR}/Doxyfile
 	                   SOURCES ${PROJECT_BINARY_DIR}/Doxyfile)
 endif()
