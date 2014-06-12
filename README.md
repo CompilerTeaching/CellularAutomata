@@ -22,6 +22,10 @@ trivially find your work!**
 Building
 --------
 
+This repository uses the Pegmatite repository as a submodule.  If you want a
+working clone, then *make sure that you pass the `--recurse-submodules`
+argument to `git clone`!*  
+
 This project has a conventional CMake build system.  To build, typically all
 that you need to do is run the following commands:
 
@@ -29,6 +33,12 @@ that you need to do is run the following commands:
 	$ cd Build
 	$ cmake ..
 	$ make
+
+If you get errors about missing files in the `Pegmatite` directory, then you
+have failed to follow the instructions.  From your source directory, run the
+following command, then retry the build steps:
+
+	$ git submodule update --init --recursive
 
 The build system assumes that it can find the `llvm-config` utility (part of
 LLVM, used for finding the other parts).  If it can not find this, then you
