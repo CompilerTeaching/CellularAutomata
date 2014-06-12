@@ -15,6 +15,33 @@ implementation that students can extend.  Possible extensions include:
 - Implementing a PTX or R600 generation to run on the GPU
 - Adding barrier semantics to global registers.
 
+**If you are going to do any of these extensions, please do not for the
+repository on GitHub - clone it and push it so that other students can not
+trivially find your work!**
+
+Building
+--------
+
+This project has a conventional CMake build system.  To build, typically all
+that you need to do is run the following commands:
+
+	$ mkdir Build
+	$ cd Build
+	$ cmake ..
+	$ make
+
+The build system assumes that it can find the `llvm-config` utility (part of
+LLVM, used for finding the other parts).  If it can not find this, then you
+will need to explicitly set the path, either from `ccmake` or by running
+`cmake -DLLVM_CONFIG={path/to/llvm-config}` when you build.
+
+If you run `ccmake` in the build directory, there are a few options that you
+can configure.  Setting `CMAKE_BUILD_TYPE` to `Debug` is recommended if you are
+modifying the code, as this will give you an unoptimised version with debug
+symbols, for easier debugging.  Make sure that you do a `Release` build before
+benchmarking though!  It's generally easier to create two build directories,
+one for each build type, rather than keep toggling the setting.
+
 Abstract machine
 ----------------
 
@@ -56,7 +83,7 @@ control construct.  It also contains a number of arithmetic assignments, in an
 assembly-like syntax.  Integer values are treated as literals and there are
 three sets of register values:
 
-	literal  := +<digit>
+	literal  ::= +<digit>
 	val      ::= "v"
 	global   ::= "g" <digit>
 	local    ::= "l" <digit>
