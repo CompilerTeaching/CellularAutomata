@@ -13,7 +13,15 @@ set(cellatom_CXX_SRCS
 	main.cc
 )
 set(LLVM_LIBS
-	all
+	instrumentation
+	irreader
+	jit
+	linker
+	lto
+	nativecodegen
+	scalaropts
+	support
+	transformutils
 )
 
 # Define the cellatom program that we will build
