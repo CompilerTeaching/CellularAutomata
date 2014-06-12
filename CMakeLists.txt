@@ -63,7 +63,10 @@ add_dependencies(cellatom build_runtime)
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${LLVM_CXXFLAGS} ${LLVM_VERSION}")
 target_link_libraries(cellatom ${LLVM_LIBS_FLAGS})
-target_link_libraries(cellatom ${LLVM_SYSTEMLIBS})
+# llvm-config only gained a --system-libs flag in 3.5
+if (LLVM_VER VERSION_GREATER 3.4)
+	target_link_libraries(cellatom ${LLVM_SYSTEMLIBS})
+endif()
 set(CMAKE_EXE_LINKER_FLAGS "${LLVM_LDFLAGS} ${CMAKE_EXE_LINKER_FLAGS}")
 
 

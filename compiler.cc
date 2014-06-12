@@ -18,6 +18,12 @@
  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
+
+#define LLVM_BEFORE(major,minor)\
+	((LLVM_MAJOR < major) || ((LLVM_MAJOR == major) && (LLVM_MINOR < minor)))
+#define LLVM_AFTER(major,minor)\
+	((LLVM_MAJOR > major) || ((LLVM_MAJOR == major) && (LLVM_MINOR > minor)))
+
 #include <llvm/Analysis/Passes.h>
 #include <llvm/Bitcode/ReaderWriter.h>
 #include <llvm/ExecutionEngine/ExecutionEngine.h>
@@ -29,8 +35,13 @@
 #include <llvm/IR/IRBuilder.h>
 #include <llvm/IR/LLVMContext.h>
 #include <llvm/IR/Module.h>
+#if LLVM_BEFORE(3,5)
+#include <llvm/Analysis/Verifier.h>
+#include <llvm/Linker.h>
+#else
 #include <llvm/IR/Verifier.h>
 #include <llvm/Linker/Linker.h>
+#endif
 #include <llvm/PassManager.h>
 #include <llvm/Support/MemoryBuffer.h>
 #include <llvm/Support/TargetSelect.h>
@@ -41,6 +52,10 @@
 #include <iostream>
 
 #include "ast.hh"
+
+#if LLVM_AFTER(3,4)
+#define OwningPtr std::unique_ptr
+#endif
 
 using namespace llvm;
 
@@ -87,13 +102,16 @@ struct State
 	State() : C(getGlobalContext()), B(C)
 	{
 		// Load the bitcode for the runtime helper code
-		std::unique_ptr<MemoryBuffer> buffer;
+		OwningPtr<MemoryBuffer> buffer;
 		error_code ec = MemoryBuffer::getFile("runtime.bc", buffer);
 		if (ec)
 		{
 			std::cerr << "Failed to open runtime.bc: " << ec.message() << "\n";
 			exit(EXIT_FAILURE);
 		}
+#if LLVM_BEFORE(3,5)
+		Mod = ParseBitcodeFile(buffer.get(), C);
+#else
 		ErrorOr<Module*> e = parseBitcodeFile(buffer.get(), C);
 		if ((ec = e.getError()))
 		{
@@ -101,6 +119,7 @@ struct State
 			exit(EXIT_FAILURE);
 		}
 		Mod = e.get();
+#endif
 		// Get the stub (prototype) for the cell function
 		F = Mod->getFunction("cell");
 		// Set it to have private linkage, so that it can be removed after being
