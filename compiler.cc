@@ -40,7 +40,7 @@
 
 #include <iostream>
 
-#include "AST.hh"
+#include "ast.hh"
 
 using namespace llvm;
 

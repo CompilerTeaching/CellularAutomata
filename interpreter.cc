@@ -1,4 +1,4 @@
-#include "AST.hh"
+#include "ast.hh"
 #include <strings.h> 
 #include <stdio.h> 
 

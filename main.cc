@@ -26,8 +26,8 @@
 #include <sys/resource.h>
 #include <time.h>
 #include <unistd.h>
-#include "Parser.hh"
-#include "AST.hh"
+#include "parser.hh"
+#include "ast.hh"
 
 static int enableTiming = 0;
 
