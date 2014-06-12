@@ -42,6 +42,9 @@ exec_program(${LLVM_CONFIG}
 exec_program(${LLVM_CONFIG}
 	ARGS --ldflags
 	OUTPUT_VARIABLE LLVM_LDFLAGS)
+exec_program(${LLVM_CONFIG}
+	ARGS --system-libs
+	OUTPUT_VARIABLE LLVM_SYSTEMLIBS)
 string(REGEX REPLACE "([0-9]*).([0-9]*).*" "-DLLVM_MAJOR=\\1 -DLLVM_MINOR=\\2"  LLVM_VERSION "${LLVM_VER}")
 
 add_custom_command(OUTPUT runtime.bc
@@ -51,9 +54,9 @@ add_custom_target(build_runtime DEPENDS runtime.bc)
 add_dependencies(cellatom build_runtime)
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${LLVM_CXXFLAGS} ${LLVM_VERSION}")
-set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${LLVM_LDFLAGS}")
-set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${LLVM_LIBS_FLAGS}")
-set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -lcurses")
+target_link_libraries(cellatom ${LLVM_LIBS_FLAGS})
+target_link_libraries(cellatom ${LLVM_SYSTEMLIBS})
+set(CMAKE_EXE_LINKER_FLAGS "${LLVM_LDFLAGS} ${CMAKE_EXE_LINKER_FLAGS}")
 
 
 
