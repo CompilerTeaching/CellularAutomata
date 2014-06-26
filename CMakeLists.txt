@@ -61,7 +61,10 @@ add_custom_command(OUTPUT runtime.bc
 add_custom_target(build_runtime DEPENDS runtime.bc)
 add_dependencies(cellatom build_runtime)
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${LLVM_CXXFLAGS} ${LLVM_VERSION}")
+# Explicitly enable RTTI.  The llvm-config output may add -fno-rtti, but
+# Pegmatite needs it.
+set(CMAKE_CXX_FLAGS
+	"${CMAKE_CXX_FLAGS} ${LLVM_CXXFLAGS} ${LLVM_VERSION} -frtti")
 target_link_libraries(cellatom ${LLVM_LIBS_FLAGS})
 # llvm-config only gained a --system-libs flag in 3.5
 if (LLVM_VER VERSION_GREATER 3.4)
