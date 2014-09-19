@@ -36,6 +36,7 @@
 #include <llvm/IR/LLVMContext.h>
 #include <llvm/IR/Module.h>
 #if LLVM_BEFORE(3,5)
+#include <llvm/Support/system_error.h>
 #include <llvm/Analysis/Verifier.h>
 #include <llvm/Linker.h>
 #else
@@ -45,17 +46,12 @@
 #include <llvm/PassManager.h>
 #include <llvm/Support/MemoryBuffer.h>
 #include <llvm/Support/TargetSelect.h>
-#include <llvm/Support/system_error.h>
 #include <llvm/Transforms/IPO/PassManagerBuilder.h>
 #include <llvm/Transforms/IPO.h>
 
 #include <iostream>
 
 #include "ast.hh"
-
-#if LLVM_AFTER(3,4)
-#define OwningPtr std::unique_ptr
-#endif
 
 using namespace llvm;
 
@@ -102,6 +98,7 @@ struct State
 	State() : C(getGlobalContext()), B(C)
 	{
 		// Load the bitcode for the runtime helper code
+#if LLVM_BEFORE(3,5)
 		OwningPtr<MemoryBuffer> buffer;
 		error_code ec = MemoryBuffer::getFile("runtime.bc", buffer);
 		if (ec)
@@ -109,10 +106,16 @@ struct State
 			std::cerr << "Failed to open runtime.bc: " << ec.message() << "\n";
 			exit(EXIT_FAILURE);
 		}
-#if LLVM_BEFORE(3,5)
 		Mod = ParseBitcodeFile(buffer.get(), C);
 #else
-		ErrorOr<Module*> e = parseBitcodeFile(buffer.get(), C);
+		auto buffer = MemoryBuffer::getFile("runtime.bc");
+		std::error_code ec;
+		if ((ec = buffer.getError()))
+		{
+			std::cerr << "Failed to open runtime.bc: " << ec.message() << "\n";
+			exit(EXIT_FAILURE);
+		}
+		ErrorOr<Module*> e = parseBitcodeFile(buffer.get().get(), C);
 		if ((ec = e.getError()))
 		{
 			std::cerr << "Failed to parse runtime.bc: " << ec.message() << "\n";
