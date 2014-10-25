@@ -17,3 +17,5 @@
 
 # Build directory
 Build
+Debug
+Release
