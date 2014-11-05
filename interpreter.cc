@@ -154,7 +154,7 @@ uint16_t Neighbours::interpret(Interpreter::State &state)
 			if (y < 0 || y >= state.height) continue;
 			if (x == state.x && y == state.y) continue;
 			// a0 contains the value for the currently visited neighbour
-			state.a[0] = state.grid[x*state.width + y];
+			state.a[0] = state.grid[y*state.width + x];
 			// Run all of the statements
 			statements->interpret(state);
 		}
