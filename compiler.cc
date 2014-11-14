@@ -443,7 +443,7 @@ Value* Neighbours::compile(Compiler::State &s)
 	B.SetInsertPoint(body);
 
 	// Load the value at the current grid point into a0
-	Value *idx = B.CreateAdd(XPhi, B.CreateMul(YPhi, width));
+	Value *idx = B.CreateAdd(YPhi, B.CreateMul(XPhi, height));
 	B.CreateStore(B.CreateLoad(B.CreateGEP(s.oldGrid, idx)), s.a[0]);
 
 	// Compile each of the statements inside the loop
