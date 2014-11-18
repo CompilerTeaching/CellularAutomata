@@ -258,11 +258,13 @@ void LocalRegister::assign(Compiler::State &s, Value* val)
 }
 Value* GlobalRegister::compile(Compiler::State &s)
 {
+	assert(registerNumber >= 0 && registerNumber < 10);
 	return s.B.CreateLoad(s.g[registerNumber]);
 }
 void GlobalRegister::assign(Compiler::State &s, Value* val)
 {
-	s.B.CreateStore(val, s.a[registerNumber]);
+	assert(registerNumber >= 0 && registerNumber < 10);
+	s.B.CreateStore(val, s.g[registerNumber]);
 }
 Value* VRegister::compile(Compiler::State &s)
 {
