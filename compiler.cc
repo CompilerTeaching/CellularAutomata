@@ -444,8 +444,16 @@ Value* Neighbours::compile(Compiler::State &s)
 	// Now we start emitting the body of the loop
 	B.SetInsertPoint(body);
 
+	// For larger grid sizes, we need to make sure that we're doing i32
+	// arithmetic, or we'll overflow
+	IntegerType *i32 = IntegerType::get(C, 32);
+	Value *x32 = B.CreateZExt(XPhi, i32);
+	Value *y32 = B.CreateZExt(YPhi, i32);
+	Value *height32 = B.CreateZExt(height, i32);
+	// Compute the address of the grid
+	Value *idx = B.CreateAdd(y32, B.CreateMul(x32, height32));
+
 	// Load the value at the current grid point into a0
-	Value *idx = B.CreateAdd(YPhi, B.CreateMul(XPhi, height));
 	B.CreateStore(B.CreateLoad(B.CreateGEP(s.oldGrid, idx)), s.a[0]);
 
 	// Compile each of the statements inside the loop
