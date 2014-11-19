@@ -124,7 +124,7 @@ The valid operations are:
   value)
 - `=` simple assignment
 
-All operations (with the expression of `=`) are read-modify-write operations.
+All operations (with the exception of `=`) are read-modify-write operations.
 This is intentional, as it makes it easy to extend the definition of operations
 on global registers to provide atomicity guarantees, without having to change
 the language syntax.
