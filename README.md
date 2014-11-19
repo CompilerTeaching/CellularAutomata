@@ -108,7 +108,7 @@ All arithmetic operations are in the following form
 
 	<op> <destination register> <expression>
 
-For example, adding 3 to register `l4` (local register number 4) would be:
+For example, adding 3 to register `a4` (local register number 4) would be:
 
 	+ l4 3
 
