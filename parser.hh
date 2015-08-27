@@ -23,7 +23,7 @@
 namespace Parser
 {
 	using pegmatite::Rule;
-	using pegmatite::operator""_E;
+	using pegmatite::operator"" _E;
 	using pegmatite::ExprPtr;
 	using pegmatite::BindAST;
 	using pegmatite::any;
