@@ -84,18 +84,16 @@ int main(int argc, char **argv)
 	// Do the parsing
 	Parser::CellAtomParser p;
 	pegmatite::AsciiFileInput input(open(argv[0], O_RDONLY));
-	pegmatite::ErrorList el;
 	std::unique_ptr<AST::StatementList> ast = 0;
 	c1 = clock();
-	if (!p.parse(input, p.g.statements, p.g.ignored, el, ast))
+	pegmatite::ErrorReporter err =
+		[](const pegmatite::InputRange& r, const std::string& msg) {
+		std::cout << "error: " << msg << std::endl;
+		std::cout << "line " << r.start.line
+		          << ", col " << r.start.col << std::endl;
+	};
+	if (!p.parse(input, p.g.statements, p.g.ignored, err, ast))
 	{
-		std::cout << "errors: \n";
-		for (auto &err : el)
-		{
-			std::cout << "line " << err.start.line
-			          << ", col " << err.finish.col <<  ": ";
-			std::cout << "syntax error" << std::endl;
-		}
 		return EXIT_FAILURE;
 	}
 	logTimeSince(c1, "Parsing program");
