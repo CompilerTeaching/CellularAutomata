@@ -53,6 +53,9 @@ exec_program(${LLVM_CONFIG}
 exec_program(${LLVM_CONFIG}
 	ARGS --system-libs
 	OUTPUT_VARIABLE LLVM_SYSTEMLIBS)
+exec_program(${LLVM_CONFIG}
+	ARGS --libdir
+	OUTPUT_VARIABLE LLVM_LIBDIR)
 string(REGEX REPLACE "([0-9]*).([0-9]*).*" "-DLLVM_MAJOR=\\1 -DLLVM_MINOR=\\2"  LLVM_VERSION "${LLVM_VER}")
 
 add_custom_command(OUTPUT runtime.bc
@@ -70,8 +73,11 @@ target_link_libraries(cellatom ${LLVM_LIBS_FLAGS})
 if (LLVM_VER VERSION_GREATER 3.4)
 	target_link_libraries(cellatom ${LLVM_SYSTEMLIBS})
 endif()
-set(CMAKE_EXE_LINKER_FLAGS "${LLVM_LDFLAGS} ${CMAKE_EXE_LINKER_FLAGS}")
+set(CMAKE_EXE_LINKER_FLAGS "${LLVM_LDFLAGS} ${CMAKE_EXE_LINKER_FLAGS} -Wl,-rpath,${LLVM_LIBDIR}")
 
+# Make sure that we use the LLVM path as an rpath so that we can dynamically
+# link to LLVM.  Don't let CMake specify its own rpath
+set(CMAKE_SKIP_RPATH true)
 
 
 
