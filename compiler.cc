@@ -18,12 +18,6 @@
  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-
-#define LLVM_BEFORE(major,minor)\
-	((LLVM_MAJOR < major) || ((LLVM_MAJOR == major) && (LLVM_MINOR < minor)))
-#define LLVM_AFTER(major,minor)\
-	((LLVM_MAJOR > major) || ((LLVM_MAJOR == major) && (LLVM_MINOR > minor)))
-
 #include <llvm/Analysis/Passes.h>
 #include <llvm/Bitcode/ReaderWriter.h>
 #include <llvm/ExecutionEngine/ExecutionEngine.h>
@@ -35,14 +29,8 @@
 #include <llvm/IR/IRBuilder.h>
 #include <llvm/IR/LLVMContext.h>
 #include <llvm/IR/Module.h>
-#if LLVM_BEFORE(3,5)
-#include <llvm/Support/system_error.h>
-#include <llvm/Analysis/Verifier.h>
-#include <llvm/Linker.h>
-#else
 #include <llvm/IR/Verifier.h>
 #include <llvm/Linker/Linker.h>
-#endif
 #include <llvm/PassManager.h>
 #include <llvm/Support/MemoryBuffer.h>
 #include <llvm/Support/TargetSelect.h>
@@ -62,7 +50,7 @@ struct State
 	/** LLVM uses a context object to allow multiple threads */
 	LLVMContext &C;
 	/** The compilation unit that we are generating */
-	Module *Mod;
+	std::unique_ptr<Module> Mod;
 	/** The function representing the program */
 	Function *F;
 	/** A helper class for generating instructions */
@@ -98,16 +86,6 @@ struct State
 	State() : C(getGlobalContext()), B(C)
 	{
 		// Load the bitcode for the runtime helper code
-#if LLVM_BEFORE(3,5)
-		OwningPtr<MemoryBuffer> buffer;
-		error_code ec = MemoryBuffer::getFile("runtime.bc", buffer);
-		if (ec)
-		{
-			std::cerr << "Failed to open runtime.bc: " << ec.message() << "\n";
-			exit(EXIT_FAILURE);
-		}
-		Mod = ParseBitcodeFile(buffer.get(), C);
-#else
 		auto buffer = MemoryBuffer::getFile("runtime.bc");
 		std::error_code ec;
 		if ((ec = buffer.getError()))
@@ -115,14 +93,13 @@ struct State
 			std::cerr << "Failed to open runtime.bc: " << ec.message() << "\n";
 			exit(EXIT_FAILURE);
 		}
-		ErrorOr<Module*> e = parseBitcodeFile(buffer.get().get(), C);
+		auto e = parseBitcodeFile(buffer.get()->getMemBufferRef(), C);
 		if ((ec = e.getError()))
 		{
 			std::cerr << "Failed to parse runtime.bc: " << ec.message() << "\n";
 			exit(EXIT_FAILURE);
 		}
-		Mod = e.get();
-#endif
+		Mod.swap(e.get());
 		// Get the stub (prototype) for the cell function
 		F = Mod->getFunction("cell");
 		// Set it to have private linkage, so that it can be removed after being
@@ -189,7 +166,8 @@ struct State
 		PMBuilder.Inliner = createFunctionInliningPass(275);
 		// Now create a function pass manager that is responsible for running
 		// passes that optimise functions, and populate it.
-		FunctionPassManager *PerFunctionPasses= new FunctionPassManager(Mod);
+		FunctionPassManager *PerFunctionPasses =
+			new FunctionPassManager(Mod.get());
 		PMBuilder.populateFunctionPassManager(*PerFunctionPasses);
 
 		// Run all of the function passes on the functions in our module
@@ -212,14 +190,16 @@ struct State
 		// Now we are ready to generate some code.  First create the execution
 		// engine (JIT)
 		std::string error;
-		ExecutionEngine *EE = ExecutionEngine::create(Mod, false, &error);
+		EngineBuilder EB(std::move(Mod));
+		EB.setErrorStr(&error);
+		ExecutionEngine *EE = EB.create();
 		if (!EE)
 		{
 			fprintf(stderr, "Error: %s\n", error.c_str());
 			exit(-1);
 		}
 		// Now tell it to compile
-		return (automaton)EE->getPointerToFunction(Mod->getFunction("automaton"));
+		return (automaton)EE->getFunctionAddress("automaton");
 	}
 
 };
@@ -229,7 +209,8 @@ automaton compile(AST::StatementList *ast, int optimiseLevel)
 	// These functions do nothing, they just ensure that the correct modules are
 	// not removed by the linker.
 	InitializeNativeTarget();
-	LLVMLinkInJIT();
+	InitializeNativeTargetAsmPrinter();
+	LLVMLinkInMCJIT();
 	
 	State s;
 	ast->compile(s);

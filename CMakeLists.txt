@@ -15,7 +15,7 @@ set(cellatom_CXX_SRCS
 set(LLVM_LIBS
 	instrumentation
 	irreader
-	jit
+	mcjit
 	linker
 	lto
 	nativecodegen
