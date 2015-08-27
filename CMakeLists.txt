@@ -56,10 +56,13 @@ exec_program(${LLVM_CONFIG}
 exec_program(${LLVM_CONFIG}
 	ARGS --libdir
 	OUTPUT_VARIABLE LLVM_LIBDIR)
+exec_program(${LLVM_CONFIG}
+	ARGS --bindir
+	OUTPUT_VARIABLE LLVM_BINDIR)
 string(REGEX REPLACE "([0-9]*).([0-9]*).*" "-DLLVM_MAJOR=\\1 -DLLVM_MINOR=\\2"  LLVM_VERSION "${LLVM_VER}")
 
 add_custom_command(OUTPUT runtime.bc
-	COMMAND clang -c -emit-llvm ${CMAKE_CURRENT_SOURCE_DIR}/runtime.c -o runtime.bc -O0
+	COMMAND "${LLVM_BINDIR}/clang" -c -emit-llvm ${CMAKE_CURRENT_SOURCE_DIR}/runtime.c -o runtime.bc -O0
 	MAIN_DEPENDENCY runtime.c)
 add_custom_target(build_runtime DEPENDS runtime.bc)
 add_dependencies(cellatom build_runtime)
