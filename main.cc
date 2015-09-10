@@ -38,7 +38,7 @@ static void logTimeSince(clock_t c1, const char *msg)
 	struct rusage r;
 	getrusage(RUSAGE_SELF, &r);
 	fprintf(stderr, "%s took %f seconds.	Peak used %ldKB.\n", msg,
-		((double)c2 - (double)c1) / (double)CLOCKS_PER_SEC, r.ru_maxrss);
+		(static_cast<double>(c2) - static_cast<double>(c1)) / static_cast<double>(CLOCKS_PER_SEC), r.ru_maxrss);
 }
 
 int main(int argc, char **argv)
@@ -120,8 +120,8 @@ int main(int argc, char **argv)
 	int16_t *g1 = oldgrid;
 	int16_t *g2 = newgrid;
 #else
-	int16_t *g1 = (int16_t*)malloc(sizeof(int16_t) * gridSize * gridSize);
-	int16_t *g2 = (int16_t*)malloc(sizeof(int16_t) * gridSize * gridSize);
+	int16_t *g1 = reinterpret_cast<int16_t*>(malloc(sizeof(int16_t) * gridSize * gridSize));
+	int16_t *g2 = reinterpret_cast<int16_t*>(malloc(sizeof(int16_t) * gridSize * gridSize));
 	//int16_t *g2 = new int16_t[gridSize * gridSize];
 	c1 = clock();
 	for (int i=0 ; i<(gridSize*gridSize) ; i++)

@@ -89,16 +89,15 @@ struct State
 	{
 		// Load the bitcode for the runtime helper code
 		auto buffer = MemoryBuffer::getFile("runtime.bc");
-		std::error_code ec;
-		if ((ec = buffer.getError()))
+		if (std::error_code ec = buffer.getError())
 		{
-			std::cerr << "Failed to open runtime.bc: " << ec.message() << "\n";
+			std::cerr << "Failed to open runtime.bc: " << ec.message() << std::endl;
 			exit(EXIT_FAILURE);
 		}
 		auto e = parseBitcodeFile(buffer.get()->getMemBufferRef(), C);
-		if ((ec = e.getError()))
+		if (std::error_code ec = e.getError())
 		{
-			std::cerr << "Failed to parse runtime.bc: " << ec.message() << "\n";
+			std::cerr << "Failed to parse runtime.bc: " << ec.message() << std::endl;
 			exit(EXIT_FAILURE);
 		}
 		Mod.swap(e.get());
@@ -201,7 +200,7 @@ struct State
 			exit(-1);
 		}
 		// Now tell it to compile
-		return (automaton)EE->getFunctionAddress("automaton");
+		return reinterpret_cast<automaton>(EE->getFunctionAddress("automaton"));
 	}
 
 };
@@ -316,7 +315,6 @@ Value* RangeExpr::compile(Compiler::State &s)
 	PHINode *phi = PHINode::Create(s.regTy, ranges.objects().size(),
 	                               "range_result", cont);
 	// Now loop over all of the possible ranges and create a test for each one
-	BasicBlock *current = B.GetInsertBlock();
 	for (const auto &re : ranges.objects())
 	{
 		Value *match;
@@ -359,8 +357,7 @@ Value* RangeExpr::compile(Compiler::State &s)
 		// continuation block.
 		B.CreateBr(cont);
 		// ...and repeat
-		current = next;
-		B.SetInsertPoint(current);
+		B.SetInsertPoint(next);
 	}
 	// If we've fallen off the end, set the default value of zero and branch to
 	// the continuation point.

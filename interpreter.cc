@@ -1,6 +1,6 @@
 #include "ast.hh"
-#include <strings.h> 
-#include <stdio.h> 
+#include <stdio.h>
+#include <strings.h>
 
 using namespace AST;
 
@@ -55,7 +55,7 @@ void runOneStep(int16_t *oldgrid,
 	}
 }
 
-}
+}  // namespace Interpreter
 
 uint16_t Literal::interpret(Interpreter::State &s)
 {
@@ -148,11 +148,11 @@ uint16_t Neighbours::interpret(Interpreter::State &state)
 	// For each of the (valid) neighbours
 	for (int x = state.x - 1 ; x <= state.x + 1 ; x++)
 	{
-		if (x < 0 || x >= state.width) continue;
+		if (x < 0 || x >= state.width) { continue; }
 		for (int y = state.y - 1 ; y <= state.y + 1 ; y++)
 		{
-			if (y < 0 || y >= state.height) continue;
-			if (x == state.x && y == state.y) continue;
+			if (y < 0 || y >= state.height) { continue; }
+			if (x == state.x && y == state.y) { continue; }
 			// a0 contains the value for the currently visited neighbour
 			state.a[0] = state.grid[x*state.height + y];
 			// Run all of the statements

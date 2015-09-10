@@ -73,4 +73,4 @@ void Op::construct(const pegmatite::InputRange &r,
 		}
 	}
 }
-}
+}  // namespace AST
