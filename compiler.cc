@@ -31,7 +31,7 @@
 #include <llvm/IR/Module.h>
 #include <llvm/IR/Verifier.h>
 #include <llvm/Linker/Linker.h>
-#include <llvm/PassManager.h>
+#include <llvm/IR/LegacyPassManager.h>
 #include <llvm/Support/MemoryBuffer.h>
 #include <llvm/Support/TargetSelect.h>
 #include <llvm/Transforms/IPO/PassManagerBuilder.h>
@@ -42,6 +42,8 @@
 #include "ast.hh"
 
 using namespace llvm;
+using llvm::legacy::PassManager;
+using llvm::legacy::FunctionPassManager;
 
 namespace Compiler
 {
