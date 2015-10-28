@@ -54,6 +54,8 @@ int main(int argc, char **argv)
 	{
 		switch (c)
 		{
+			default:
+				break;
 			case 'j':
 				useJIT = 1;
 				break;
@@ -69,7 +71,7 @@ int main(int argc, char **argv)
 			case 't':
 				enableTiming = 1;
 				break;
-			case 'o':
+			case 'O':
 				optimiseLevel = strtol(optarg, 0, 10);
 		}
 	}
