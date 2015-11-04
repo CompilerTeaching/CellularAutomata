@@ -96,7 +96,7 @@ three sets of register values:
 	literal  ::= +<digit>
 	val      ::= "v"
 	global   ::= "g" <digit>
-	local    ::= "l" <digit>
+	local    ::= "a" <digit>
 	register ::= <val> <global> <local>
 
 ### Arithmetic and assignment
@@ -110,7 +110,7 @@ All arithmetic operations are in the following form
 
 For example, adding 3 to register `a4` (local register number 4) would be:
 
-	+ l4 3
+	+ a4 3
 
 The valid operations are:
 
