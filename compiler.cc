@@ -42,15 +42,13 @@
 #include "ast.hh"
 
 using namespace llvm;
-using llvm::legacy::PassManager;
-using llvm::legacy::FunctionPassManager;
 
 namespace Compiler
 {
 struct State
 {
 	/** LLVM uses a context object to allow multiple threads */
-	LLVMContext &C;
+	LLVMContext C;
 	/** The compilation unit that we are generating */
 	std::unique_ptr<Module> Mod;
 	/** The function representing the program */
@@ -85,7 +83,7 @@ struct State
 	 * file and prepares the module, including setting up all of the LLVM state
 	 * required.
 	 */
-	State() : C(getGlobalContext()), B(C)
+	State() : B(C)
 	{
 		// Load the bitcode for the runtime helper code
 		auto buffer = MemoryBuffer::getFile("runtime.bc");
@@ -114,12 +112,12 @@ struct State
 
 		// Collect the function parameters
 		auto args = F->arg_begin();
-		oldGrid = args++;
-		newGrid = args++;
-		width = args++;
-		height = args++;
-		x = args++;
-		y = args++;
+		oldGrid = &*(args++);
+		newGrid = &*(args++);
+		width = &*(args++);
+		height = &*(args++);
+		x = &*(args++);
+		y = &*(args++);
 
 		// Create space on the stack for the local registers
 		for (int i=0 ; i<10 ; i++)
@@ -130,10 +128,10 @@ struct State
 		// assigned to, and will be returned at the end.  Store the value passed
 		// as a parameter in this.
 		v = B.CreateAlloca(regTy);
-		B.CreateStore(args++, v);
+		B.CreateStore(&*(args++), v);
 
 		// Create a load of pointers to the global registers.
-		Value *gArg = args;
+		Value *gArg = &*args;
 		for (int i=0 ; i<10 ; i++)
 		{
 			B.CreateStore(ConstantInt::get(regTy, 0), a[i]);
@@ -167,8 +165,8 @@ struct State
 		PMBuilder.Inliner = createFunctionInliningPass(275);
 		// Now create a function pass manager that is responsible for running
 		// passes that optimise functions, and populate it.
-		FunctionPassManager *PerFunctionPasses =
-			new FunctionPassManager(Mod.get());
+		legacy::FunctionPassManager *PerFunctionPasses =
+			new legacy::FunctionPassManager(Mod.get());
 		PMBuilder.populateFunctionPassManager(*PerFunctionPasses);
 
 		// Run all of the function passes on the functions in our module
@@ -183,7 +181,7 @@ struct State
 		PerFunctionPasses->doFinalization();
 		delete PerFunctionPasses;
 		// Run the per-module passes
-		PassManager *PerModulePasses = new PassManager();
+		legacy::PassManager *PerModulePasses = new legacy::PassManager();
 		PMBuilder.populateModulePassManager(*PerModulePasses);
 		PerModulePasses->run(*Mod);
 		delete PerModulePasses;
