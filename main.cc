@@ -78,7 +78,7 @@ int main(int argc, char **argv)
 	argc -= optind;
 	if (argc < 1)
 	{
-		fprintf(stderr, "usage: %s -jt -i {iterations} -o {optimisation level} -x {grid size} -m {max initial value} {file name}\n", argv[0]);
+		fprintf(stderr, "usage: %s -jt -i {iterations} -O {optimisation level} -x {grid size} -m {max initial value} {file name}\n", argv[0]);
 		return EXIT_FAILURE;
 	}
 	argv += optind;
