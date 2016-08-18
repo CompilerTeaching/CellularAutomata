@@ -27,12 +27,7 @@ namespace AST
 void Literal::construct(const pegmatite::InputRange &r,
                         pegmatite::ASTStack &st)
 {
-	std::stringstream stream;
-	for (char c : r)
-	{
-		stream << c;
-	}
-	stream >> value;
+	pegmatite::constructValue(r, value);
 }
 void LocalRegister::construct(const pegmatite::InputRange &r,
                               pegmatite::ASTStack &st)
