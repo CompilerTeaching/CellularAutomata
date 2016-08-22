@@ -110,11 +110,11 @@ namespace AST
 		 * The value for this literal.
 		 */
 		uint16_t value;
-		virtual uint16_t interpret(Interpreter::State &) override;
-		virtual llvm::Value *compile(Compiler::State &) override;
+		uint16_t interpret(Interpreter::State &) override;
 		bool construct(const pegmatite::InputRange &r,
 		               pegmatite::ASTStack &st,
 		               const pegmatite::ErrorReporter &) override;
+		llvm::Value *compile(Compiler::State &) override;
 	};
 
 	/**
@@ -163,13 +163,13 @@ namespace AST
 		 * The number of the local register that this references.
 		 */
 		int registerNumber;
-		virtual uint16_t interpret(Interpreter::State &) override;
-		virtual void assign(Interpreter::State &, uint16_t) override;
-		virtual llvm::Value *compile(Compiler::State &) override;
-		virtual void assign(Compiler::State &, llvm::Value*) override;
 		bool construct(const pegmatite::InputRange &r,
 		               pegmatite::ASTStack &st,
 		               const pegmatite::ErrorReporter &) override;
+		uint16_t interpret(Interpreter::State &) override;
+		void assign(Interpreter::State &, uint16_t) override;
+		llvm::Value *compile(Compiler::State &) override;
+		void assign(Compiler::State &, llvm::Value*) override;
 	};
 
 	/**
@@ -182,13 +182,13 @@ namespace AST
 		 * The number of the global register that this references.
 		 */
 		int registerNumber;
-		virtual uint16_t interpret(Interpreter::State &) override;
-		virtual void assign(Interpreter::State &, uint16_t) override;
-		virtual llvm::Value *compile(Compiler::State &) override;
-		virtual void assign(Compiler::State &, llvm::Value*) override;
 		bool construct(const pegmatite::InputRange &r,
 		               pegmatite::ASTStack &st,
 		               const pegmatite::ErrorReporter &) override;
+		uint16_t interpret(Interpreter::State &) override;
+		void assign(Interpreter::State &, uint16_t) override;
+		llvm::Value *compile(Compiler::State &) override;
+		void assign(Compiler::State &, llvm::Value*) override;
 	};
 	/**
 	 * Value representing the operation to use in an arithmetic / assignment
