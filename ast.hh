@@ -111,9 +111,10 @@ namespace AST
 		 */
 		uint16_t value;
 		virtual uint16_t interpret(Interpreter::State &) override;
-		virtual void construct(const pegmatite::InputRange &r,
-		                       pegmatite::ASTStack &st) override;
 		virtual llvm::Value *compile(Compiler::State &) override;
+		bool construct(const pegmatite::InputRange &r,
+		               pegmatite::ASTStack &st,
+		               const pegmatite::ErrorReporter &) override;
 	};
 
 	/**
@@ -162,12 +163,13 @@ namespace AST
 		 * The number of the local register that this references.
 		 */
 		int registerNumber;
-		virtual void construct(const pegmatite::InputRange &r,
-		                       pegmatite::ASTStack &st) override;
 		virtual uint16_t interpret(Interpreter::State &) override;
 		virtual void assign(Interpreter::State &, uint16_t) override;
 		virtual llvm::Value *compile(Compiler::State &) override;
 		virtual void assign(Compiler::State &, llvm::Value*) override;
+		bool construct(const pegmatite::InputRange &r,
+		               pegmatite::ASTStack &st,
+		               const pegmatite::ErrorReporter &) override;
 	};
 
 	/**
@@ -180,12 +182,13 @@ namespace AST
 		 * The number of the global register that this references.
 		 */
 		int registerNumber;
-		virtual void construct(const pegmatite::InputRange &r,
-		                       pegmatite::ASTStack &st) override;
 		virtual uint16_t interpret(Interpreter::State &) override;
 		virtual void assign(Interpreter::State &, uint16_t) override;
 		virtual llvm::Value *compile(Compiler::State &) override;
 		virtual void assign(Compiler::State &, llvm::Value*) override;
+		bool construct(const pegmatite::InputRange &r,
+		               pegmatite::ASTStack &st,
+		               const pegmatite::ErrorReporter &) override;
 	};
 	/**
 	 * Value representing the operation to use in an arithmetic / assignment
@@ -206,8 +209,9 @@ namespace AST
 			Min,
 			Max
 		} op;
-		virtual void construct(const pegmatite::InputRange &r,
-		                       pegmatite::ASTStack &st) override;
+		bool construct(const pegmatite::InputRange &r,
+		               pegmatite::ASTStack &st,
+		               const pegmatite::ErrorReporter &) override;
 	};
 	/**
 	 * Arithmetic nodes, for example '+ a0 12' (add the value 12 to register

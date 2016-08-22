@@ -310,10 +310,10 @@ Value* RangeExpr::compile(Compiler::State &s)
 	// will be reached after the range expression.
 	BasicBlock *cont = BasicBlock::Create(s.C, "range_continue", s.F);
 	// In this block, create a PHI node that contains the result.
-	PHINode *phi = PHINode::Create(s.regTy, ranges.objects().size(),
+	PHINode *phi = PHINode::Create(s.regTy, ranges.size(),
 	                               "range_result", cont);
 	// Now loop over all of the possible ranges and create a test for each one
-	for (const auto &re : ranges.objects())
+	for (const auto &re : ranges)
 	{
 		Value *match;
 		// If there is just one range value then we just need an
@@ -455,7 +455,7 @@ Value* Neighbours::compile(Compiler::State &s)
 
 Value* StatementList::compile(Compiler::State& state)
 {
-	for (auto &s: statements.objects())
+	for (auto &s: statements)
 	{
 		s->compile(state);
 	}

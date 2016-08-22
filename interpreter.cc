@@ -144,7 +144,7 @@ uint16_t Arithmetic::interpret(Interpreter::State &s)
 uint16_t RangeExpr::interpret(Interpreter::State &s)
 {
 	uint16_t input = value->interpret(s);
-	for (auto &range : ranges.objects())
+	for (auto &range : ranges)
 	{
 		uint16_t end = range->end->value;
 		if (range->start.get())
@@ -184,7 +184,7 @@ uint16_t Neighbours::interpret(Interpreter::State &state)
 
 uint16_t StatementList::interpret(Interpreter::State& state)
 {
-	for (auto &s: statements.objects())
+	for (auto &s: statements)
 	{
 		s->interpret(state);
 	}

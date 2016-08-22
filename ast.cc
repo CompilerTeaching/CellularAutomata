@@ -24,31 +24,39 @@
 
 namespace AST
 {
-void Literal::construct(const pegmatite::InputRange &r,
-                        pegmatite::ASTStack &st)
+bool Literal::construct(const pegmatite::InputRange &r,
+                        pegmatite::ASTStack &st,
+                        const pegmatite::ErrorReporter &)
 {
 	pegmatite::constructValue(r, value);
+	return true;
 }
-void LocalRegister::construct(const pegmatite::InputRange &r,
-                              pegmatite::ASTStack &st)
+bool LocalRegister::construct(const pegmatite::InputRange &r,
+                              pegmatite::ASTStack &st,
+                              const pegmatite::ErrorReporter &)
 {
 	// Skip the leading l
 	registerNumber = *(++r.begin()) - '0';
+	return true;
 }
-void GlobalRegister::construct(const pegmatite::InputRange &r,
-                               pegmatite::ASTStack &st)
+bool GlobalRegister::construct(const pegmatite::InputRange &r,
+                               pegmatite::ASTStack &st,
+                               const pegmatite::ErrorReporter &)
 {
 	// Skip the leading g
 	registerNumber = *(++r.begin()) - '0';
+	return true;
 }
-void Op::construct(const pegmatite::InputRange &r,
-                   pegmatite::ASTStack &st)
+bool Op::construct(const pegmatite::InputRange &r,
+                   pegmatite::ASTStack &st,
+                   const pegmatite::ErrorReporter &)
 {
 	// If it's a one-character value:
 	if (++r.begin() == r.end())
 	{
 		switch (*r.begin())
 		{
+			default: return false;
 			case '=': op = Assign ; break;
 			case '+': op = Add ; break;
 			case '-': op = Sub ; break;
@@ -67,5 +75,6 @@ void Op::construct(const pegmatite::InputRange &r,
 			op = Min;
 		}
 	}
+	return true;
 }
 }  // namespace AST
