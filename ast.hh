@@ -222,7 +222,7 @@ namespace AST
 		/**
 		 * The operation to perform.
 		 */
-		pegmatite::ASTPtr<Op>         op;
+		pegmatite::ASTChild<Op>         op;
 		/**
 		 * The target register.  All operations in the cellatom language are
 		 * read-modify-write.

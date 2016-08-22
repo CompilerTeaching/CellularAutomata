@@ -113,7 +113,7 @@ uint16_t Arithmetic::interpret(Interpreter::State &s)
 	uint16_t v = value->interpret(s);
 	uint16_t o = target->interpret(s);
 	uint16_t result;
-	switch (op->op)
+	switch (op.op)
 	{
 		case Op::Add:
 			result = o+v;

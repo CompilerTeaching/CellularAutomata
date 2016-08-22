@@ -264,7 +264,7 @@ Value* Arithmetic::compile(Compiler::State &s)
 	Value *result;
 	// For most operations, we can just create a single IR instruction and then
 	// store the result.  For min and max, we create a comparison and a select
-	switch (op->op)
+	switch (op.op)
 	{
 		case Op::Add:
 			result = B.CreateAdd(v, o);
