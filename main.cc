@@ -81,6 +81,11 @@ int main(int argc, char **argv)
 		fprintf(stderr, "usage: %s -jt -i {iterations} -O {optimisation level} -x {grid size} -m {max initial value} {file name}\n", argv[0]);
 		return EXIT_FAILURE;
 	}
+	if (gridSize < 1 || gridSize >= 1<<15)
+	{
+		fprintf(stderr, "Grid size must be between 1 and 2^15\n");
+		return EXIT_FAILURE;
+	}
 	argv += optind;
 
 	// Do the parsing
