@@ -42,9 +42,10 @@ namespace Parser
 		 * Comments, including tracking newlines inside comments via the
 		 * whitespace rule.
 		 */
-		Rule comment     = '"' >>
-		                   (*(!ExprPtr('"'_E) >> (nl('\n') | any()))) >>
-		                   '"';
+		Rule comment     = ('"' >>
+		                    (*(!ExprPtr('"'_E) >> (nl('\n') | any()))) >>
+		                   '"') |
+		                   "//"_E >> *(!(ExprPtr("\n")) >> any()) >> nl('\n');
 		/**
 		 * Rule for treating both comments and whitespace as ignored tokens.
 		 */
