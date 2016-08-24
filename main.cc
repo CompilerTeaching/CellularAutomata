@@ -44,6 +44,7 @@ static void logTimeSince(clock_t c1, const char *msg)
 
 int main(int argc, char **argv)
 {
+	std::string cmd = argv[0];
 	std::string path = dirname(argv[0]);
 	int iterations = 1;
 	bool useJIT = false;
@@ -53,12 +54,23 @@ int main(int argc, char **argv)
 	int maxValue = 1;
 	clock_t c1;
 	int c;
+	auto usage = [=]() {
+		std::cerr << "usage: " << cmd << " [-hjt] -i {iterations} -O {level} -x {size} -m {max} {file name}" << std::endl
+		          << " -h          Display this help" << std::endl
+		          << " -j          Compile (don't interpret) the program" << std::endl
+		          << " -t          Display timing information" << std::endl
+		          << " -O {level}  Set the optimisation level [default: " <<optimiseLevel << ']' << std::endl
+		          << " -x {size}   Use a size by size grid [default: " << gridSize << ']' << std::endl
+		          << " -m {max}    The maximum value for a random grid [default: " << maxValue << ']' << std::endl
+		          << " {file name} The .ca source to run" << std::endl;
+	};
 	while ((c = getopt(argc, argv, "dji:tO:x:m:")) != -1)
 	{
 		switch (c)
 		{
 			default:
-				break;
+				usage();
+				return EXIT_SUCCESS;
 			case 'j':
 				useJIT = 1;
 				break;
@@ -84,7 +96,7 @@ int main(int argc, char **argv)
 	argc -= optind;
 	if (argc < 1)
 	{
-		fprintf(stderr, "usage: %s -jt -i {iterations} -O {optimisation level} -x {grid size} -m {max initial value} {file name}\n", argv[0]);
+		usage();
 		return EXIT_FAILURE;
 	}
 	if (gridSize < 1 || gridSize >= 1<<15)
