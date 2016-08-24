@@ -47,12 +47,13 @@ int main(int argc, char **argv)
 	std::string path = dirname(argv[0]);
 	int iterations = 1;
 	bool useJIT = false;
+	bool debugGrid = false;
 	int optimiseLevel = 0;
 	int gridSize = 5;
 	int maxValue = 1;
 	clock_t c1;
 	int c;
-	while ((c = getopt(argc, argv, "ji:tO:x:m:")) != -1)
+	while ((c = getopt(argc, argv, "dji:tO:x:m:")) != -1)
 	{
 		switch (c)
 		{
@@ -72,6 +73,9 @@ int main(int argc, char **argv)
 				break;
 			case 't':
 				enableTiming = true;
+				break;
+			case 'd':
+				debugGrid = true;
 				break;
 			case 'O':
 				optimiseLevel = strtol(optarg, 0, 10);
@@ -108,7 +112,6 @@ int main(int argc, char **argv)
 	logTimeSince(c1, "Parsing program");
 	assert(ast);
 
-#ifdef STATIC_TESTING_GRID
 	int16_t oldgrid[] = {
 		 0,0,0,0,0,
 		 0,0,0,0,0,
@@ -117,23 +120,29 @@ int main(int argc, char **argv)
 		 0,0,0,0,0
 	};
 	int16_t newgrid[25];
-	gridSize = 5;
-	int16_t *g1 = oldgrid;
-	int16_t *g2 = newgrid;
-#else
-	int16_t *g1 = reinterpret_cast<int16_t*>(malloc(sizeof(int16_t) * gridSize * gridSize));
-	int16_t *g2 = reinterpret_cast<int16_t*>(malloc(sizeof(int16_t) * gridSize * gridSize));
-	//int16_t *g2 = new int16_t[gridSize * gridSize];
-	c1 = clock();
-	for (int i=0 ; i<(gridSize*gridSize) ; i++)
+	int16_t *g1;
+	int16_t *g2;
+	if (debugGrid)
 	{
-		g1[i] = random() % (maxValue + 1);
+		gridSize = 5;
+		g1 = oldgrid;
+		g2 = newgrid;
 	}
-	logTimeSince(c1, "Generating random grid");
-#endif
+	else
+	{
+		g1 = new int16_t[gridSize * gridSize];
+		g2 = new int16_t[gridSize * gridSize];
+		c1 = clock();
+		for (int i=0 ; i<(gridSize*gridSize) ; i++)
+		{
+			g1[i] = random() % (maxValue + 1);
+		}
+		logTimeSince(c1, "Generating random grid");
+	}
 	int i=0;
 	if (useJIT)
 	{
+		
 		c1 = clock();
 		Compiler::automaton ca = Compiler::compile(ast.get(), optimiseLevel, path);
 		logTimeSince(c1, "Compiling");
