@@ -108,14 +108,6 @@ int main(int argc, char **argv)
 	logTimeSince(c1, "Parsing program");
 	assert(ast);
 
-
-#ifdef DUMP_AST
-	for (uintptr_t i=0 ; i<result->count ; i++)
-	{
-		printAST(result->list[i]);
-		putchar('\n');
-	}
-#endif
 #ifdef STATIC_TESTING_GRID
 	int16_t oldgrid[] = {
 		 0,0,0,0,0,
