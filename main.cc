@@ -46,7 +46,7 @@ int main(int argc, char **argv)
 {
 	std::string path = dirname(argv[0]);
 	int iterations = 1;
-	int useJIT = 0;
+	bool useJIT = false;
 	int optimiseLevel = 0;
 	int gridSize = 5;
 	int maxValue = 1;
@@ -71,7 +71,7 @@ int main(int argc, char **argv)
 				iterations = strtol(optarg, 0, 10);
 				break;
 			case 't':
-				enableTiming = 1;
+				enableTiming = true;
 				break;
 			case 'O':
 				optimiseLevel = strtol(optarg, 0, 10);
