@@ -83,13 +83,22 @@ struct State
 	 * file and prepares the module, including setting up all of the LLVM state
 	 * required.
 	 */
-	State() : B(C)
+	State(const std::string &path) : B(C)
 	{
+		std::string bcpath;
+		if (path.size() == 0)
+		{
+			bcpath = "runtime.bc";
+		}
+		else
+		{
+			bcpath = path + "/runtime.bc";
+		}
 		// Load the bitcode for the runtime helper code
-		auto buffer = MemoryBuffer::getFile("runtime.bc");
+		auto buffer = MemoryBuffer::getFile(bcpath);
 		if (std::error_code ec = buffer.getError())
 		{
-			std::cerr << "Failed to open runtime.bc: " << ec.message() << std::endl;
+			std::cerr << "Failed to open " << bcpath << ": " << ec.message() << std::endl;
 			exit(EXIT_FAILURE);
 		}
 		auto e = parseBitcodeFile(buffer.get()->getMemBufferRef(), C);
@@ -203,7 +212,7 @@ struct State
 
 };
 
-automaton compile(AST::StatementList *ast, int optimiseLevel)
+automaton compile(AST::StatementList *ast, int optimiseLevel, const std::string &path)
 {
 	// These functions do nothing, they just ensure that the correct modules are
 	// not removed by the linker.
@@ -211,7 +220,7 @@ automaton compile(AST::StatementList *ast, int optimiseLevel)
 	InitializeNativeTargetAsmPrinter();
 	LLVMLinkInMCJIT();
 	
-	State s;
+	State s(path);
 	ast->compile(s);
 	// And then return the compiled version.
 	return s.getAutomaton(optimiseLevel);

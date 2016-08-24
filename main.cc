@@ -24,6 +24,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/resource.h>
+#include <libgen.h>
 #include <time.h>
 #include <unistd.h>
 #include "parser.hh"
@@ -43,6 +44,7 @@ static void logTimeSince(clock_t c1, const char *msg)
 
 int main(int argc, char **argv)
 {
+	std::string path = dirname(argv[0]);
 	int iterations = 1;
 	int useJIT = 0;
 	int optimiseLevel = 0;
@@ -141,7 +143,7 @@ int main(int argc, char **argv)
 	if (useJIT)
 	{
 		c1 = clock();
-		Compiler::automaton ca = Compiler::compile(ast.get(), optimiseLevel);
+		Compiler::automaton ca = Compiler::compile(ast.get(), optimiseLevel, path);
 		logTimeSince(c1, "Compiling");
 		c1 = clock();
 		for (int i=0 ; i<iterations ; i++)

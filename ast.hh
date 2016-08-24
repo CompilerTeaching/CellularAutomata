@@ -60,9 +60,12 @@ namespace Compiler
 	                         int16_t height);
 	/**
 	 * Compile the AST.  The optimisation level indicates how aggressive
-	 * optimisation should be.  Zero indicates no optimisation.
+	 * optimisation should be.  Zero indicates no optimisation.  The `path`
+	 * argument tells the compiler where to look for the `runtime.bc` file.
 	 */
-	automaton compile(AST::StatementList *ast, int optimiseLevel);
+	automaton compile(AST::StatementList *ast,
+	                  int optimiseLevel,
+	                  const std::string &path);
 }
 namespace llvm
 {
