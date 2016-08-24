@@ -101,3 +101,10 @@ if(BUILD_DOCUMENTATION)
 	                   SOURCES ${PROJECT_BINARY_DIR}/Doxyfile)
 endif()
 
+option(ENABLE_TESTS "Enable the tests")
+
+if(ENABLE_TESTS)
+	enable_testing()
+	add_subdirectory("Tests")
+endif()
+

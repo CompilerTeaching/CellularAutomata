@@ -1,0 +1,10 @@
+" Simple program that just toggles each cell between 0 and 1. "
+" Note that this depends on the default behaviour for range statements, mapping
+  unmatched values to 0. "
+= v [ v | 0 => 1 ]
+
+// CHECK: 1 1 1 1 1 
+// CHECK: 1 1 1 1 1 
+// CHECK: 1 0 0 0 1 
+// CHECK: 1 1 1 1 1 
+// CHECK: 1 1 1 1 1 

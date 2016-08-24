@@ -1,0 +1,9 @@
+neighbours ( + a1 1)
+= v a1
+
+// CHECK: 3 5 5 5 3 
+// CHECK: 5 8 8 8 5 
+// CHECK: 5 8 8 8 5 
+// CHECK: 5 8 8 8 5 
+// CHECK: 3 5 5 5 3 
+
