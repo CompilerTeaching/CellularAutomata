@@ -19,7 +19,7 @@
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 #include <llvm/Analysis/Passes.h>
-#include <llvm/Bitcode/ReaderWriter.h>
+#include <llvm/Bitcode/BitcodeReader.h>
 #include <llvm/ExecutionEngine/ExecutionEngine.h>
 #include <llvm/ExecutionEngine/GenericValue.h>
 #include <llvm/IR/Constants.h>
@@ -102,9 +102,9 @@ struct State
 			exit(EXIT_FAILURE);
 		}
 		auto e = parseBitcodeFile(buffer.get()->getMemBufferRef(), C);
-		if (std::error_code ec = e.getError())
+		if (auto ec = e.takeError())
 		{
-			std::cerr << "Failed to parse runtime.bc: " << ec.message() << std::endl;
+			std::cerr << "Failed to parse runtime.bc: " << std::endl;
 			exit(EXIT_FAILURE);
 		}
 		Mod.swap(e.get());
