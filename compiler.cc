@@ -19,6 +19,7 @@
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 #include <llvm/Analysis/Passes.h>
+#include <llvm/Analysis/TargetTransformInfo.h>
 #include <llvm/Bitcode/BitcodeReader.h>
 #include <llvm/ExecutionEngine/ExecutionEngine.h>
 #include <llvm/ExecutionEngine/GenericValue.h>
@@ -28,14 +29,17 @@
 #include <llvm/IR/GlobalVariable.h>
 #include <llvm/IR/IRBuilder.h>
 #include <llvm/IR/LLVMContext.h>
+#include <llvm/IR/LegacyPassManager.h>
 #include <llvm/IR/Module.h>
 #include <llvm/IR/Verifier.h>
 #include <llvm/Linker/Linker.h>
-#include <llvm/IR/LegacyPassManager.h>
 #include <llvm/Support/MemoryBuffer.h>
+#include <llvm/Support/TargetRegistry.h>
 #include <llvm/Support/TargetSelect.h>
-#include <llvm/Transforms/IPO/PassManagerBuilder.h>
+#include <llvm/Target/TargetMachine.h>
 #include <llvm/Transforms/IPO.h>
+#include <llvm/Transforms/IPO/AlwaysInliner.h>
+#include <llvm/Transforms/IPO/PassManagerBuilder.h>
 
 #include <iostream>
 
@@ -108,11 +112,13 @@ struct State
 			exit(EXIT_FAILURE);
 		}
 		Mod.swap(e.get());
+
 		// Get the stub (prototype) for the cell function
 		F = Mod->getFunction("cell");
 		// Set it to have private linkage, so that it can be removed after being
 		// inlined.
 		F->setLinkage(GlobalValue::PrivateLinkage);
+		F->addFnAttr(Attribute::AlwaysInline);
 		// Add an entry basic block to this function and set it
 		BasicBlock *entry = BasicBlock::Create(C, "entry", F);
 		B.SetInsertPoint(entry);
@@ -163,19 +169,42 @@ struct State
 		Mod->dump();
 		verifyModule(*Mod);
 #endif
+
 		// Now we need to construct the set of optimisations that we're going to
 		// run.
+
+		// Create a target machine from the module triple. This is needed to add
+		// associated target passes, so that (among others) automatic vectorization
+		// works!
+		std::string const TripleDesc = Mod->getTargetTriple();
+		std::string error;
+		Target const *Tgt = TargetRegistry::lookupTarget(TripleDesc, error);
+		if (!Tgt) {
+			report_fatal_error("Module does not provide a target description.");
+		}
+		TargetMachine *TM = Tgt->createTargetMachine(TripleDesc,
+				"", // cpu
+				"", // features
+				TargetOptions(),
+				Optional<Reloc::Model>());
+		if (!TM) {
+			report_fatal_error("unable to create TargetMachine");
+		}
+
 		PassManagerBuilder PMBuilder;
 		// Set the optimisation level.  This defines what optimisation passes
 		// will be added.
 		PMBuilder.OptLevel = optimiseLevel;
+		PMBuilder.LoopVectorize = true;
+		PMBuilder.SLPVectorize = true;
 		// Create a basic inliner.  This will inline the cell function that we've
 		// just created into the automaton function that we're going to create.
-		PMBuilder.Inliner = createFunctionInliningPass(275);
+		PMBuilder.Inliner = createAlwaysInlinerLegacyPass();
 		// Now create a function pass manager that is responsible for running
 		// passes that optimise functions, and populate it.
 		legacy::FunctionPassManager *PerFunctionPasses =
 			new legacy::FunctionPassManager(Mod.get());
+		PerFunctionPasses->add(createTargetTransformInfoWrapperPass(TM->getTargetIRAnalysis()));
 		PMBuilder.populateFunctionPassManager(*PerFunctionPasses);
 
 		// Run all of the function passes on the functions in our module
@@ -191,16 +220,16 @@ struct State
 		delete PerFunctionPasses;
 		// Run the per-module passes
 		legacy::PassManager *PerModulePasses = new legacy::PassManager();
+		PerModulePasses->add(createTargetTransformInfoWrapperPass(TM->getTargetIRAnalysis()));
 		PMBuilder.populateModulePassManager(*PerModulePasses);
 		PerModulePasses->run(*Mod);
 		delete PerModulePasses;
 
 		// Now we are ready to generate some code.  First create the execution
 		// engine (JIT)
-		std::string error;
 		EngineBuilder EB(std::move(Mod));
 		EB.setErrorStr(&error);
-		ExecutionEngine *EE = EB.create();
+		ExecutionEngine *EE = EB.create(TM);
 		if (!EE)
 		{
 			fprintf(stderr, "Error: %s\n", error.c_str());
