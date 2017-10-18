@@ -186,7 +186,8 @@ struct State
 				"", // cpu
 				"", // features
 				TargetOptions(),
-				Optional<Reloc::Model>());
+				Optional<Reloc::Model>(),
+				CodeModel::JITDefault);
 		if (!TM) {
 			report_fatal_error("unable to create TargetMachine");
 		}
