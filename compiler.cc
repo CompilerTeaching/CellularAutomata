@@ -113,6 +113,9 @@ struct State
 		}
 		Mod.swap(e.get());
 
+		Function *Automaton = Mod->getFunction("automaton");
+		Automaton->removeFnAttr(Attribute::OptimizeNone);
+		
 		// Get the stub (prototype) for the cell function
 		F = Mod->getFunction("cell");
 		// Set it to have private linkage, so that it can be removed after being
